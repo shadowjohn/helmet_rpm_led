@@ -56,3 +56,8 @@
 </video>
 <br>
 影片供參考：<a target="_blank" href="https://github.com/shadowjohn/helmet_rpm_led/blob/main/snapshot/helmet_rpm_led.mp4">實作影片</a>
+
+<br><br>
+<h3>心得：</h3>
+	分享心得：https://3wa.tw/blog/blog.php?id=2091
+<br>
