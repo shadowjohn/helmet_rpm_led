@@ -55,4 +55,4 @@
   <img src="snapshot/helmet_rpm_led.png">
 </video>
 <br>
-影片供參考
+影片供參考：<a target="_blank" href="https://github.com/shadowjohn/helmet_rpm_led/blob/main/snapshot/helmet_rpm_led.mp4">實作影片</a>
