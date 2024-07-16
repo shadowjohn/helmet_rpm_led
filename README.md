@@ -5,10 +5,13 @@
 
 <h3>作者：</h3>
 	羽山秋人 (https://3wa.tw)
-
+<br>
+<h3>最初開發日期：</h3>
+	2024-07-15 23:24
+<br>
 <h3>版權：</h3>
 	MIT License
-	
+<br>	
 <h3>所需材料：</h3>
 <ul>
 	<li>1. Arduino D1 mini x 2</li>
@@ -23,9 +26,9 @@
 	<li>10. AA 3號電池 電池盒 單排或雙排</li>
 	<li>11. 恥力要很夠</li>
 </ul>
-
+<br>
 <img src="snapshot/helmet.png">
-假設那二條像嗄抓的尾巴是 LED 燈條，可以用來顯示車主瘋狂拉轉XD
+<center>假設那二條像嗄抓的尾巴是 LED 燈條，可以用來顯示車主瘋狂拉轉XD</center>
 
 <br>
 使用二塊有 Wifi 的 Arduino D1 mini 作為開發板
@@ -39,7 +42,7 @@
 
 <br>
 <img src="snapshot/server_helmet_display.png">
-(Server)安全帽上電路的接線方式
+<center>(Server)安全帽上電路的接線方式</center>
 
 <br>
 <br>
@@ -47,7 +50,7 @@
 	啟動後會持續偵測引擎轉速，偵測的方式可以接碼表的轉速表訊號線，或是晶式高壓線圈輸入端的黑線或綠線，或是凸台的脈衝訊號線
 <br>	
 <img src="snapshot/client_engine_rpm_capture.png">
-(Client)轉速表訊號端的接線方式
+<center>(Client)轉速表訊號端的接線方式</center>
 
 <br>
 <video autoplay loop style="width:100%; height: auto; position:absolute; z-index: -1;">
