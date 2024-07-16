@@ -49,8 +49,10 @@
 <img src="snapshot/client_engine_rpm_capture.png">
 (Client)轉速表訊號端的接線方式
 
-
-<video poster="snapshot/helmet_rpm_led.png" width="600" height="450" controls preload="none" style="border:2px solid #fff;">
-  <source type="video/mp4" src="snapshot/helmet_rpm_led.mp4" />
+<br>
+<video autoplay loop style="width:100%; height: auto; position:absolute; z-index: -1;">
+  <source src="snapshot/helmet_rpm_led.mp4" type="video/mp4" />  
+  <img src="snapshot/helmet_rpm_led.png">
 </video>
+<br>
 影片供參考
