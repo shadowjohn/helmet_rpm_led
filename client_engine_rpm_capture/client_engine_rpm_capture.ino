@@ -22,7 +22,7 @@ const int udpPort = 12345; // 接收端的端口
 WiFiUDP udp;
 
 Ticker wifiReconnectTimer;
-#define ToPin D1    //凸台、或轉速訊號線
+#define ToPin D6    //凸台、或轉速訊號線
 
 volatile unsigned long C = micros(); //本次偵測到凸台的時間
 volatile unsigned long C_old = 0; //上一次偵測到凸台的時間

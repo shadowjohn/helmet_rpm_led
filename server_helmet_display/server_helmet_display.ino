@@ -14,6 +14,8 @@
 #define NUMPIXELS 25 // 25顆 LED
 Adafruit_NeoPixel strip(NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
 
+// 收到的 udp 包
+static char incomingPacket[255];
 // 熱點名稱和密碼
 const char* ssid = "3wa_helmet_server";
 const char* password = "********";
@@ -27,22 +29,7 @@ IPAddress subnet(255,255,255,0);
 WiFiUDP udp;
 const int udpPort = 12345;
 
-// 轉速範圍對應顏色
-uint32_t getRPMColor(int rpm) {
-  if (rpm <= 4000) {
-    return strip.Color(0, 255, 0); // 綠色
-  } else if (rpm <= 6000) {
-    return strip.Color(255, 255, 0); // 黃色
-  } else if (rpm <= 7500) {
-    return strip.Color(255, 165, 0); // 橙色
-  } else if (rpm < 10000) {
-    return strip.Color(255, 0, 0); // 紅色
-  } else {
-    static bool blinkState = false;
-    blinkState = !blinkState;
-    return blinkState ? strip.Color(255, 0, 0) : strip.Color(0, 0, 0); // 紅色閃爍
-  }
-}
+
 uint32_t blendColors(uint32_t color1, uint32_t color2, int blend) {
   uint8_t r1 = (color1 >> 16) & 0xFF;
   uint8_t g1 = (color1 >> 8) & 0xFF;
@@ -61,40 +48,54 @@ uint32_t blendColors(uint32_t color1, uint32_t color2, int blend) {
 void displayOnLed(int show_rpm)
 {
   // 將轉速顯示在NeoPixel LED
-  int led_count = map(show_rpm, 0, 9999, 0, NUMPIXELS);
+  int led_count = map(show_rpm, 0, 8000, 0, NUMPIXELS);
   for (int i = 0; i < NUMPIXELS; i++) {
     if (i < led_count) {
       uint32_t color1, color2;
       int range_start, range_end;
 
-      if (show_rpm <= 6000) {
+      if (show_rpm <= 4000) {
         color1 = strip.Color(0, 255, 0); // 綠色
         color2 = strip.Color(0, 255, 0); // 綠色
         range_start = 0;
-        range_end = 6000;
-      } else if (show_rpm <= 8000) {
+        range_end = 4000;
+      } else if (show_rpm <= 6000) {
         color1 = strip.Color(0, 255, 0); // 綠色
         color2 = strip.Color(255, 255, 0); // 黃色
-        range_start = 6000;
-        range_end = 8000;
-      } else if (show_rpm <= 9500) {
-        color1 = strip.Color(255, 255, 0); // 黃色
-        color2 = strip.Color(255, 165, 0); // 橙色
-        range_start = 8000;
-        range_end = 9500;
-      } else {
+        range_start = 4000;
+        range_end = 6000;      
+      } else if (show_rpm <= 8000) {
         color1 = strip.Color(255, 165, 0); // 橙色
         color2 = strip.Color(255, 0, 0); // 紅色
-        range_start = 9500;
+        range_start = 6000;
+        range_end = 8000;      
+      } else {
+        color1 = strip.Color(255, 0, 0); // 紅色
+        color2 = strip.Color(255, 255, 255); // 白色
+        range_start = 8000;
         range_end = 10000;
       }
 
       int local_rpm = map(show_rpm, range_start, range_end, 0, 255);
+      local_rpm = (local_rpm<0)?0: local_rpm;
+      local_rpm = (local_rpm>255)?255: local_rpm;
       uint32_t color = blendColors(color1, color2, local_rpm);
+     
       strip.setPixelColor(i, color);
     } else {
       strip.setPixelColor(i, 0); // 關閉LED
     }
+  }
+  if (show_rpm > 8000) 
+  {
+      if (random(0, 10) > 7) 
+      {
+        for (int i = 0; i < NUMPIXELS; i++) 
+        {
+            //color = strip.Color(0, 0, 0); // 關燈                   
+            strip.setPixelColor(i, 0);
+        }
+     }
   }
   strip.show();
 }
@@ -126,23 +127,27 @@ void setup() {
   // 打印熱點啟動信息
   Serial.println("WiFi AP started");
 }
-
+bool isNumber(const char *str) {
+  while (*str) {
+    if (!isdigit(*str)) {
+      return false;
+    }
+    str++;
+  }
+  return true;
+}
 void loop() {  
   // 監聽 UDP 端口 12345
   int packetSize = udp.parsePacket();
-  if (packetSize) {
-    char incomingPacket[255];
+  if (packetSize) {    
     int len = udp.read(incomingPacket, 255);
     if (len > 0) {
       incomingPacket[len] = 0; // Null-terminate the string
     }
-    Serial.printf("Received UDP packet: %s\n", incomingPacket);
-    int rpm = atoi(incomingPacket);
-    displayOnLed(rpm);
-    
-    // 應該不用 回應收到的數據
-    //udp.beginPacket(udp.remoteIP(), udp.remotePort());
-    //udp.write("Message received");
-    //udp.endPacket();
+    if (isNumber(incomingPacket)) {
+        int rpm = atoi(incomingPacket);
+        displayOnLed(rpm);
+    }    
   }
+  delay(10);
 }
