@@ -12,7 +12,7 @@
 
 #define LED_PIN    D1 //接 Pixel LED
 #define NUMPIXELS 25 // 25顆 LED
-Adafruit_NeoPixel strip(NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
+static Adafruit_NeoPixel strip(NUMPIXELS, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 // 收到的 udp 包
 static char incomingPacket[255];
@@ -49,6 +49,8 @@ void displayOnLed(int show_rpm)
 {
   // 將轉速顯示在NeoPixel LED
   int led_count = map(show_rpm, 0, 8000, 0, NUMPIXELS);
+  led_count = (led_count<0)?0:led_count;
+  led_count = (led_count>NUMPIXELS)?NUMPIXELS:led_count;
   for (int i = 0; i < NUMPIXELS; i++) {
     if (i < led_count) {
       uint32_t color1, color2;
@@ -97,7 +99,7 @@ void displayOnLed(int show_rpm)
         }
      }
   }
-  strip.show();
+  //strip.show();
 }
 void setup() {
   // 初始化串口通訊
@@ -110,9 +112,16 @@ void setup() {
   // 配置熱點的 IP 地址、網關和子網掩碼
   WiFi.softAPConfig(local_ip, gateway, subnet);
 
-  // 啟動 WiFi 熱點
-  WiFi.softAP(ssid, password); 
+  // 避免重連
+  WiFi.setAutoConnect(false);
+  WiFi.setAutoReconnect(false); 
+  
+  // 啟動隱藏的 WiFi 熱點，通道 11
+  WiFi.softAP(ssid, password, 1, true);
 
+  
+
+  
   // 打印熱點的 IP 地址
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
@@ -136,6 +145,13 @@ bool isNumber(const char *str) {
   }
   return true;
 }
+
+unsigned long lastPacketTime = 0;
+const unsigned long timeout = 1000; // 1秒的超時時間
+
+unsigned long lastShowTime = 0;
+const unsigned long lastShowTimeout = 10; // 10ms的超時時間
+
 void loop() {  
   // 監聽 UDP 端口 12345
   int packetSize = udp.parsePacket();
@@ -147,7 +163,17 @@ void loop() {
     if (isNumber(incomingPacket)) {
         int rpm = atoi(incomingPacket);
         displayOnLed(rpm);
-    }    
+        lastPacketTime = millis(); // 更新最後收到資料的時間
+    }      
   }
-  delay(10);
+  // 檢查是否超時
+  if (millis() - lastPacketTime > timeout) {
+    displayOnLed(0); // 超時，顯示 0 RPM
+    lastPacketTime = millis(); // 更新最後收到資料的時間
+  }
+  if (millis() - lastShowTime > lastShowTimeout) {
+    strip.show();
+    lastShowTime = millis(); // 更新顯示時間
+  }
+  yield(); // 用 yield() 來喂看門狗並讓出 CPU
 }
